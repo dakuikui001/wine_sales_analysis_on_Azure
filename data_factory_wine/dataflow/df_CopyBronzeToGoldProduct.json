@@ -1,0 +1,127 @@
+{
+	"name": "df_CopyBronzeToGoldProduct",
+	"properties": {
+		"folder": {
+			"name": "03_silvertogold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "adls_parquet_product",
+						"type": "DatasetReference"
+					},
+					"name": "CopyParquetProduct"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkParquetGoldProduct"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "SelectColumns"
+				},
+				{
+					"name": "CastColumnType"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ProductId as integer,",
+				"          Country as string,",
+				"          Score as short,",
+				"          DealerPrice as short,",
+				"          Markup as double,",
+				"          ListPrice as double,",
+				"          Province as string,",
+				"          Region_1 as string,",
+				"          Region_2 as string,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Winery as string,",
+				"          Year as short,",
+				"          website as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     purgeFiles: true,",
+				"     partitionRootPath: 'medallion/bronze/product_parquet',",
+				"     format: 'parquet') ~> CopyParquetProduct",
+				"CopyParquetProduct derive(load_timestamp = currentUTC()) ~> derivedColumn1",
+				"filter1 select(mapColumn(",
+				"          ProductId,",
+				"          Country,",
+				"          Score,",
+				"          DealerPrice,",
+				"          Markup,",
+				"          ListPrice,",
+				"          Province,",
+				"          Region_1,",
+				"          Region_2,",
+				"          Title,",
+				"          Vintage,",
+				"          Variety,",
+				"          Winery,",
+				"          Year,",
+				"          Store = website,",
+				"          load_timestamp",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+				"SelectColumns cast(output(",
+				"          ProductId as integer,",
+				"          Country as string,",
+				"          Score as short,",
+				"          DealerPrice as double,",
+				"          Markup as double,",
+				"          ListPrice as double,",
+				"          Province as string,",
+				"          Region_1 as string,",
+				"          Region_2 as string,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Winery as string,",
+				"          Year as short,",
+				"          Store as string,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     errors: true) ~> CastColumnType",
+				"derivedColumn1 filter(!isNull(ProductId)) ~> filter1",
+				"CastColumnType sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/product',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkParquetGoldProduct"
+			]
+		}
+	}
+}

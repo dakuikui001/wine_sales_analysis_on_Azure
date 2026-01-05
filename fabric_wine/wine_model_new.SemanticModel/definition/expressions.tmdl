@@ -1,0 +1,11 @@
+expression 'DirectLake - wine_LH' =
+		let
+		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/2f21b515-b056-4235-86c6-83f9d00851c2/08502798-e574-4391-b30f-89fab6fae805", [HierarchicalNavigation=true])
+		in
+		    Source
+	lineageTag: 3a87bf78-3892-4fba-a9da-92ddf68b98e0
+
+	annotation PBI_IncludeFutureArtifacts = False
+
+	annotation PBI_RemovedChildren = [{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[dbo].[currency]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[dbo].[sales]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[dbo].[currency_rate]"}},"objectType":"Table"}]
+

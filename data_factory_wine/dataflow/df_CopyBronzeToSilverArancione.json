@@ -1,0 +1,74 @@
+{
+	"name": "df_CopyBronzeToSilverArancione",
+	"properties": {
+		"folder": {
+			"name": "02_bronzetosilver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "adls_csv_silverArancione",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvArancione"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "adls_parquet_silverArancione",
+						"type": "DatasetReference"
+					},
+					"name": "sinkCsvForAarancione"
+				}
+			],
+			"transformations": [
+				{
+					"name": "cast1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          OnlineRetailer as string,",
+				"          SalesMonth as string,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as double,",
+				"          ListPrice as double,",
+				"          Quantity as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     purgeFiles: true,",
+				"     wildcardPaths:['medallion/silver/salesdata/Arancione*.csv']) ~> SourceCsvArancione",
+				"derivedColumn1 cast(output(",
+				"          OnlineRetailer as string,",
+				"          SalesMonth as date,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as double,",
+				"          ListPrice as double,",
+				"          Quantity as long",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"SourceCsvArancione derive(SalesMonth = lastDayOfMonth(toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) ~> derivedColumn1",
+				"cast1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkCsvForAarancione"
+			]
+		}
+	}
+}

@@ -1,0 +1,166 @@
+table product
+	lineageTag: 9f911abb-78ec-4bbf-8ca8-5d2b02b1f412
+	sourceLineageTag: [dbo].[product]
+
+	column ProductId
+		dataType: int64
+		formatString: 0
+		lineageTag: feb47a9a-c8db-4489-9a08-0411828cf723
+		sourceLineageTag: ProductId
+		summarizeBy: none
+		sourceColumn: ProductId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: d038f467-d2d9-4e3e-b47c-714307bb80c5
+		sourceLineageTag: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column Score
+		dataType: int64
+		formatString: 0
+		lineageTag: b755dd3b-0bf6-4557-95b0-4cb1e1b876fb
+		sourceLineageTag: Score
+		summarizeBy: none
+		sourceColumn: Score
+
+		annotation SummarizationSetBy = Automatic
+
+	column DealerPrice
+		dataType: double
+		lineageTag: 93fa1830-dc14-4201-9c5b-32fd2d62eb25
+		sourceLineageTag: DealerPrice
+		summarizeBy: none
+		sourceColumn: DealerPrice
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Markup
+		dataType: double
+		lineageTag: 47ccaf5d-f00d-4038-a4f4-7f9491c41157
+		sourceLineageTag: Markup
+		summarizeBy: none
+		sourceColumn: Markup
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ListPrice
+		dataType: double
+		lineageTag: 140c47a8-4dcc-4839-a554-646c55443e05
+		sourceLineageTag: ListPrice
+		summarizeBy: none
+		sourceColumn: ListPrice
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Province
+		dataType: string
+		lineageTag: f6b97550-f1fb-46e0-a509-21ed9b268eb9
+		sourceLineageTag: Province
+		summarizeBy: none
+		sourceColumn: Province
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region_1
+		dataType: string
+		lineageTag: 1030ce9b-d649-4403-9c5e-1b457df65659
+		sourceLineageTag: Region_1
+		summarizeBy: none
+		sourceColumn: Region_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region_2
+		dataType: string
+		lineageTag: 5ddaeed2-4073-4336-85fd-e07263e0042e
+		sourceLineageTag: Region_2
+		summarizeBy: none
+		sourceColumn: Region_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column Title
+		dataType: string
+		lineageTag: de4a8ff6-b26a-41f1-ae07-a5cd8f1b6b5f
+		sourceLineageTag: Title
+		summarizeBy: none
+		sourceColumn: Title
+
+		annotation SummarizationSetBy = Automatic
+
+	column Vintage
+		dataType: int64
+		formatString: 0
+		lineageTag: 6714cfc8-6c84-4c91-acae-4f429f20bc8a
+		sourceLineageTag: Vintage
+		summarizeBy: none
+		sourceColumn: Vintage
+
+		annotation SummarizationSetBy = Automatic
+
+	column Variety
+		dataType: string
+		lineageTag: b01bcdde-80da-467a-b971-66263ab4cc5f
+		sourceLineageTag: Variety
+		summarizeBy: none
+		sourceColumn: Variety
+
+		annotation SummarizationSetBy = Automatic
+
+	column Winery
+		dataType: string
+		lineageTag: 181e0cf1-67b7-4df9-a958-f930c75cde14
+		sourceLineageTag: Winery
+		summarizeBy: none
+		sourceColumn: Winery
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 9ba1f620-f168-4ffe-8d33-d60c3a8f0bfb
+		sourceLineageTag: Year
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Store
+		dataType: string
+		lineageTag: 37a08c60-57b0-4154-991a-a3fc68fa3d7b
+		sourceLineageTag: Store
+		summarizeBy: none
+		sourceColumn: Store
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 4bafdf14-366f-46da-8bf1-6f03aac090e7
+		sourceLineageTag: load_timestamp
+		summarizeBy: none
+		sourceColumn: load_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	partition product = entity
+		mode: directLake
+		source
+			entityName: product
+			schemaName: dbo
+			expressionSource: 'DirectLake - wine_LH'
+

@@ -1,0 +1,167 @@
+{
+	"name": "df_CopyBronzeToSilverForCeleste",
+	"properties": {
+		"folder": {
+			"name": "02_bronzetosilver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "adls_csv_bronzeCeleste",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvCeleste"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "SourceDeltaCurrencyRate"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "adls_parquet_silverCeleste",
+						"type": "DatasetReference"
+					},
+					"name": "sinkCSVForCeleste"
+				},
+				{
+					"dataset": {
+						"referenceName": "ErrorRows",
+						"type": "DatasetReference"
+					},
+					"name": "sinkCSVForErrorCeleste"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filterSummaryLine"
+				},
+				{
+					"name": "AggMonthlyQuantity"
+				},
+				{
+					"name": "RegionAssert"
+				},
+				{
+					"name": "errorRow"
+				},
+				{
+					"name": "NoErrorRows"
+				},
+				{
+					"name": "SelectColumns"
+				},
+				{
+					"name": "CastColumnType"
+				},
+				{
+					"name": "joinCurrencyRate"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          TransactionId as string,",
+				"          TransactionDate as string,",
+				"          OnlineRetailer as string,",
+				"          SalesMonth as string,",
+				"          SalesRegion as string,",
+				"          SalesCurrency as string,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as double,",
+				"          ListPrice as double,",
+				"          Quantity as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionRootPath: 'medallion/bronze/Celeste') ~> SourceCsvCeleste",
+				"source(output(",
+				"          FromCurrency as string,",
+				"          ToCurrency as string,",
+				"          EffectiveDate as date,",
+				"          AverageRate as double,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/currency_rate') ~> SourceDeltaCurrencyRate",
+				"SourceCsvCeleste filter(left(TransactionDate, 21) != \"Total Sales Quantity:\") ~> filterSummaryLine",
+				"filterSummaryLine aggregate(groupBy(OnlineRetailer,",
+				"          SalesMonth,",
+				"          SalesRegion,",
+				"          SalesCurrency,",
+				"          Title,",
+				"          Vintage,",
+				"          Variety,",
+				"          Score,",
+				"          ListPrice),",
+				"     Quantity = sum(toInteger(Quantity))) ~> AggMonthlyQuantity",
+				"AggMonthlyQuantity assert(expectTrue(or(SalesCurrency==\"EUR\", SalesCurrency==\"GBP\"), false, 'AssertSalesCurrency')) ~> RegionAssert",
+				"RegionAssert derive(isErrorRow = isError()) ~> errorRow",
+				"errorRow split(isErrorRow == false(),",
+				"     disjoint: false) ~> NoErrorRows@(NoErrorRows, ErrorRows)",
+				"derivedColumn1 select(mapColumn(",
+				"          OnlineRetailer,",
+				"          SalesMonth,",
+				"          SalesRegion,",
+				"          Title,",
+				"          Vintage,",
+				"          Variety,",
+				"          Score,",
+				"          ListPrice,",
+				"          Quantity",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+				"SelectColumns cast(output(",
+				"          OnlineRetailer as string,",
+				"          SalesMonth as date,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as double,",
+				"          ListPrice as double,",
+				"          Quantity as long",
+				"     ),",
+				"     errors: true) ~> CastColumnType",
+				"NoErrorRows@NoErrorRows, SourceDeltaCurrencyRate join(lastDayOfMonth((toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) == EffectiveDate,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinCurrencyRate",
+				"joinCurrencyRate derive(ListPrice = iif(SalesCurrency == 'GBP', ListPrice * AverageRate, ListPrice),",
+				"          SalesMonth = lastDayOfMonth(toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) ~> derivedColumn1",
+				"CastColumnType sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkCSVForCeleste",
+				"NoErrorRows@ErrorRows sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkCSVForErrorCeleste"
+			]
+		}
+	}
+}

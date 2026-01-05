@@ -1,0 +1,48 @@
+table stores
+	lineageTag: 0b786ced-7312-46b5-b82a-cb228a31ddda
+	sourceLineageTag: [dbo].[stores]
+
+	column StoreName
+		dataType: string
+		lineageTag: b5b02ca5-0199-48c4-950b-5286e415599a
+		sourceLineageTag: StoreName
+		summarizeBy: none
+		sourceColumn: StoreName
+
+		annotation SummarizationSetBy = Automatic
+
+	column StoreType
+		dataType: string
+		lineageTag: 1cc2823a-e346-42db-bed5-9b50c6848288
+		sourceLineageTag: StoreType
+		summarizeBy: none
+		sourceColumn: StoreType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Description
+		dataType: string
+		lineageTag: 856a0d07-8199-46e4-91b2-7fdfdd06f411
+		sourceLineageTag: Description
+		summarizeBy: none
+		sourceColumn: Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 23ee3aec-3968-4aa6-8bdf-62e316048a81
+		sourceLineageTag: load_timestamp
+		summarizeBy: none
+		sourceColumn: load_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	partition stores = entity
+		mode: directLake
+		source
+			entityName: stores
+			schemaName: dbo
+			expressionSource: 'DirectLake - wine_LH'
+

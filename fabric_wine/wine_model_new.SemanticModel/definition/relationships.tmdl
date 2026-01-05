@@ -1,0 +1,12 @@
+relationship f890d844-b8d4-075d-a72d-3512a153fd19
+	fromColumn: processed_sales.OnlineRetailer
+	toColumn: stores.StoreName
+
+relationship a43c0790-7cdd-4208-5ccf-aaf0df61c833
+	fromColumn: processed_sales.ProductId
+	toColumn: product.ProductId
+
+relationship c6977786-0b41-59c8-2f0f-e7861c665c75
+	fromColumn: processed_sales.SalesMonth
+	toColumn: dates.LastDayOfMonth
+

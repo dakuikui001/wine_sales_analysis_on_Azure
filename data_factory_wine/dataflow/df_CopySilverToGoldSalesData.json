@@ -1,0 +1,82 @@
+{
+	"name": "df_CopySilverToGoldSalesData",
+	"properties": {
+		"folder": {
+			"name": "03_silvertogold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "adls_parquet_salesdata",
+						"type": "DatasetReference"
+					},
+					"name": "ParquetSilverSalesData"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkParquetForSalesData"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          OnlineRetailer as string,",
+				"          SalesMonth as date,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as double,",
+				"          ListPrice as double,",
+				"          Quantity as long,",
+				"          SalesRegion as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet',",
+				"     wildcardPaths:['medallion/silver/salesdata/**/*.parquet']) ~> ParquetSilverSalesData",
+				"ParquetSilverSalesData derive(load_timestamp = currentUTC()) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/sales',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          OnlineRetailer,",
+				"          SalesMonth,",
+				"          Title,",
+				"          Vintage,",
+				"          Variety,",
+				"          Score,",
+				"          ListPrice,",
+				"          Quantity,",
+				"          load_timestamp",
+				"     )) ~> sinkParquetForSalesData"
+			]
+		}
+	}
+}

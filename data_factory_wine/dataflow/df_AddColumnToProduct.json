@@ -1,0 +1,72 @@
+{
+	"name": "df_AddColumnToProduct",
+	"properties": {
+		"folder": {
+			"name": "03_silvertogold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "adls_csv_bronzeproduct",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvBronzeProduct"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "adls_parquet_productdata",
+						"type": "DatasetReference"
+					},
+					"name": "sinkParquetProduct",
+					"rejectedDataLinkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     df_filename as string",
+				"}",
+				"source(output(",
+				"          ProductId as integer,",
+				"          Country as string,",
+				"          Score as short,",
+				"          DealerPrice as short,",
+				"          Markup as double,",
+				"          ListPrice as double,",
+				"          Province as string,",
+				"          Region_1 as string,",
+				"          Region_2 as string,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Winery as string,",
+				"          Year as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     wildcardPaths:[(concat('medallion/bronze/ProductData/', $df_filename))]) ~> SourceCsvBronzeProduct",
+				"SourceCsvBronzeProduct derive(website = substring($df_filename, 1, length($df_filename)-13)) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkParquetProduct"
+			]
+		}
+	}
+}

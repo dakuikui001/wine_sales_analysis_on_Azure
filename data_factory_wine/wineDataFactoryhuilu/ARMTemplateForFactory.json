@@ -1,0 +1,3649 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "wineDataFactoryhuilu"
+		},
+		"ADLS_linked_service_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ADLS_linked_service'"
+		},
+		"ADLS_linked_service_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dataprojectsforhuilu.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/00_main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "01_pl_unzipandcopy",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "01_pl_unzipandcopy",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "03_pl_silvertogold_metadata",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "01_pl_unzipandcopy",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "03_pl_silvertogold_metadata",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "03_pl_silvertogold_productdata",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "03_pl_silvertogold_metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "03_pl_silvertogold_productdata",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "02_pl_bronzetosilverForCeleste",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "03_pl_silvertogold_productdata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "02_pl_bronzetosilverForCeleste",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "02_pl_bronzetosilverForArancione",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "02_pl_bronzetosilverForCeleste",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "02_pl_bronzetosilverForArancione",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "02_pl_bronzetosilverForVerde",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "02_pl_bronzetosilverForArancione",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "02_pl_bronzetosilverForVerde",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "03_pl_silvertogold_saledata",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "02_pl_bronzetosilverForVerde",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "03_pl_silvertogold_saledata",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "04_gold_agg",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "03_pl_silvertogold_saledata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "04_gold_agg",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/01_pl_unzipandcopy')]",
+				"[concat(variables('factoryId'), '/pipelines/03_pl_silvertogold_metadata')]",
+				"[concat(variables('factoryId'), '/pipelines/03_pl_silvertogold_productdata')]",
+				"[concat(variables('factoryId'), '/pipelines/02_pl_bronzetosilverForCeleste')]",
+				"[concat(variables('factoryId'), '/pipelines/02_pl_bronzetosilverForArancione')]",
+				"[concat(variables('factoryId'), '/pipelines/02_pl_bronzetosilverForVerde')]",
+				"[concat(variables('factoryId'), '/pipelines/03_pl_silvertogold_saledata')]",
+				"[concat(variables('factoryId'), '/pipelines/04_gold_agg')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/01_pl_unzipandcopy')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "unzipandcopy",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "wine-analysis/landing/"
+							},
+							{
+								"name": "Destination",
+								"value": "wine-analysis/medallion/bronze/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*"
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings",
+									"compressionProperties": {
+										"type": "ZipDeflateReadSettings",
+										"preserveZipFileNameAsFolder": false
+									}
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_zip_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_unzip_sink",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "01_unzipandcopy"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-26T10:45:55Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_zip_Source')]",
+				"[concat(variables('factoryId'), '/datasets/adls_unzip_sink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/02_pl_bronzetosilverForArancione')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "bronzetosilverForArancione",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "wine-analysis/medallion/bronze/Arancione/"
+							},
+							{
+								"name": "Destination",
+								"value": "wine-analysis/medallion/silver/salesdata/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings",
+									"skipLineCount": 0
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_csv_bronzeArancione",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_silverArancione",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "df_CopyBronzeToSilverForArancione",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "bronzetosilverForArancione",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_CopyBronzeToSilverArancione",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceCsvArancione": {},
+									"sinkCsvForAarancione": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_bronzeArancione')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_silverArancione')]",
+				"[concat(variables('factoryId'), '/dataflows/df_CopyBronzeToSilverArancione')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/02_pl_bronzetosilverForCeleste')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyBronzeToSilverForCeleste",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_CopyBronzeToSilverForCeleste",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceCsvCeleste": {},
+									"SourceDeltaCurrencyRate": {},
+									"sinkCSVForCeleste": {},
+									"sinkCSVForErrorCeleste": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_CopyBronzeToSilverForCeleste')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/02_pl_bronzetosilverForVerde')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetFileList",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "adls_json_bronzeVerde",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "JsonReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ProcessForEachFile",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetFileList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetFileList').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CopyJsonToCsv",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "JsonSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "JsonReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"copyBehavior": "FlattenHierarchy"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"path": "$['YearMonth']"
+													},
+													"sink": {
+														"name": "SalesMonth",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "$['StoreName']"
+													},
+													"sink": {
+														"name": "OnlineRetailer",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "$['Sales']['Product']"
+													},
+													"sink": {
+														"name": "Title",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "$['Sales']['Vintage']"
+													},
+													"sink": {
+														"name": "Vintage"
+													}
+												},
+												{
+													"source": {
+														"path": "$['Sales']['Variety']"
+													},
+													"sink": {
+														"name": "Variety"
+													}
+												},
+												{
+													"source": {
+														"path": "$['Sales']['Score']"
+													},
+													"sink": {
+														"name": "Score"
+													}
+												},
+												{
+													"source": {
+														"path": "$['Sales']['SalesPrice']"
+													},
+													"sink": {
+														"name": "ListPrice",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "$['Sales']['SalesQty']"
+													},
+													"sink": {
+														"name": "Quantity",
+														"type": "String"
+													}
+												}
+											],
+											"collectionReference": ""
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "adls_json_bronzeVerde_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"filename": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "adls_csv_silverVerde_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"sinkfilename": {
+													"value": "@replace(item().name, '.json', '.csv')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "df_CopyBronzeToSilverForVerde",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "ProcessForEachFile",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_CopyBronzeToSilverForVerde",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceCsvVerde": {},
+									"sinkCsvForVerde": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_json_bronzeVerde')]",
+				"[concat(variables('factoryId'), '/dataflows/df_CopyBronzeToSilverForVerde')]",
+				"[concat(variables('factoryId'), '/datasets/adls_json_bronzeVerde_param')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_silverVerde_param')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/03_pl_silvertogold_metadata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_metadata_to_gold",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_CopyCsvMetadataToGold",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceCsvCurrency": {},
+									"SourceCsvDates": {},
+									"SourceCsvExchangeRates": {},
+									"SourceCsvStore": {},
+									"SourceCsvTerritory": {},
+									"sinkParquetCurrency": {},
+									"sinkParquetDates": {},
+									"sinkParquetExchangeRates": {},
+									"sinkParquetStores": {},
+									"sinkParquetTerritory": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_CopyCsvMetadataToGold')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/03_pl_silvertogold_productdata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Product Metadata",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "adls_csv_BonzeProduct",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEachProduct",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Product Metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Product Metadata').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "AddWebsiteColumn",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "df_AddColumnToProduct",
+											"type": "DataFlowReference",
+											"parameters": {
+												"df_filename": {
+													"value": "'@{item().name}'",
+													"type": "Expression"
+												}
+											},
+											"datasetParameters": {
+												"SourceCsvBronzeProduct": {},
+												"sinkParquetProduct": {}
+											}
+										},
+										"staging": {},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										},
+										"traceLevel": "Fine"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Copy_ProductTogold",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "ForEachProduct",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_CopyBronzeToGoldProduct",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CopyParquetProduct": {},
+									"sinkParquetGoldProduct": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_BonzeProduct')]",
+				"[concat(variables('factoryId'), '/dataflows/df_CopyBronzeToGoldProduct')]",
+				"[concat(variables('factoryId'), '/dataflows/df_AddColumnToProduct')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/03_pl_silvertogold_saledata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopySilverSalesToGold",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_CopySilverToGoldSalesData",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ParquetSilverSalesData": {},
+									"sinkParquetForSalesData": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_CopySilverToGoldSalesData')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/04_gold_agg')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_gold_agg_sales",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceDeltaSales": {},
+									"SourceDeltaProduct": {},
+									"sinkFilteredSales": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-27T14:45:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_gold_agg_sales')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ErrorRows')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/errorRows",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_BonzeProduct')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/bronze/ProductData",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ";",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_bronzeArancione')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/bronze/Arancione",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "OnlineRetailer",
+						"type": "String"
+					},
+					{
+						"name": "SalesMonth",
+						"type": "String"
+					},
+					{
+						"name": "Title",
+						"type": "String"
+					},
+					{
+						"name": "Vintage",
+						"type": "String"
+					},
+					{
+						"name": "Variety",
+						"type": "String"
+					},
+					{
+						"name": "Score",
+						"type": "String"
+					},
+					{
+						"name": "ListPrice",
+						"type": "String"
+					},
+					{
+						"name": "Quantity",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_bronzeCeleste')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/bronze/Celeste",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "TransactionId",
+						"type": "String"
+					},
+					{
+						"name": "TransactionDate",
+						"type": "String"
+					},
+					{
+						"name": "OnlineRetailer",
+						"type": "String"
+					},
+					{
+						"name": "SalesMonth",
+						"type": "String"
+					},
+					{
+						"name": "SalesRegion",
+						"type": "String"
+					},
+					{
+						"name": "SalesCurrency",
+						"type": "String"
+					},
+					{
+						"name": "Title",
+						"type": "String"
+					},
+					{
+						"name": "Vintage",
+						"type": "String"
+					},
+					{
+						"name": "Variety",
+						"type": "String"
+					},
+					{
+						"name": "Score",
+						"type": "String"
+					},
+					{
+						"name": "ListPrice",
+						"type": "String"
+					},
+					{
+						"name": "Quantity",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_bronze_metadata')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "CurrencyCode",
+						"type": "String"
+					},
+					{
+						"name": "CurrencyName",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_bronzeproduct')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ";",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ProductId;Country;Score;DealerPrice;Markup;ListPrice;Province;Region_1;Region_2;Title;Vintage;Variety;Winery;Year",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_silverArancione')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_silverCeleste')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata/Celeste",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "OnlineRetailer",
+						"type": "String"
+					},
+					{
+						"name": "SalesMonth",
+						"type": "String"
+					},
+					{
+						"name": "Title",
+						"type": "String"
+					},
+					{
+						"name": "Vintage",
+						"type": "String"
+					},
+					{
+						"name": "Variety",
+						"type": "String"
+					},
+					{
+						"name": "Score",
+						"type": "String"
+					},
+					{
+						"name": "ListPrice",
+						"type": "String"
+					},
+					{
+						"name": "Quantity",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_silverVerde')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_silverVerde_param')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"sinkfilename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().sinkfilename",
+							"type": "Expression"
+						},
+						"folderPath": "medallion/silver/salesdata",
+						"fileSystem": "wine-project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "OnlineRetailer",
+						"type": "String"
+					},
+					{
+						"name": "SalesMonth",
+						"type": "String"
+					},
+					{
+						"name": "Title",
+						"type": "String"
+					},
+					{
+						"name": "Vintage",
+						"type": "String"
+					},
+					{
+						"name": "Variety",
+						"type": "String"
+					},
+					{
+						"name": "Score",
+						"type": "String"
+					},
+					{
+						"name": "ListPrice",
+						"type": "String"
+					},
+					{
+						"name": "Quantity",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_json_bronzeVerde')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/bronze/Verde",
+						"fileSystem": "wine-project"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"YearMonth": {
+							"type": "string"
+						},
+						"StoreName": {
+							"type": "string"
+						},
+						"Sales": {
+							"type": "object",
+							"properties": {
+								"Product": {
+									"type": "string"
+								},
+								"Vintage": {
+									"type": "string"
+								},
+								"Variety": {
+									"type": "string"
+								},
+								"Score": {
+									"type": "string"
+								},
+								"SalesPrice": {
+									"type": "string"
+								},
+								"SalesQty": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_json_bronzeVerde_param')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filename": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": "medallion/bronze/Verde",
+						"fileSystem": "wine-project"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"YearMonth": {
+							"type": "string"
+						},
+						"StoreName": {
+							"type": "string"
+						},
+						"Sales": {
+							"type": "object",
+							"properties": {
+								"Product": {
+									"type": "string"
+								},
+								"Vintage": {
+									"type": "string"
+								},
+								"Variety": {
+									"type": "string"
+								},
+								"Score": {
+									"type": "string"
+								},
+								"SalesPrice": {
+									"type": "string"
+								},
+								"SalesQty": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_SilverVerde_new')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata/Verde",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "OnlineRetailer",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesMonth",
+						"type": "DATE"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Quantity",
+						"type": "INT64"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_gold_Territory')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/gold/Territory",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ProductId",
+						"type": "INT32"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "DealerPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Markup",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Province",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_1",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_2",
+						"type": "UTF8"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Winery",
+						"type": "UTF8"
+					},
+					{
+						"name": "Year",
+						"type": "INT_16"
+					},
+					{
+						"name": "Store",
+						"type": "UTF8"
+					},
+					{
+						"name": "load_timestamp",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_gold_currency')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/gold/currency",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ProductId",
+						"type": "INT32"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "DealerPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Markup",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Province",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_1",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_2",
+						"type": "UTF8"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Winery",
+						"type": "UTF8"
+					},
+					{
+						"name": "Year",
+						"type": "INT_16"
+					},
+					{
+						"name": "Store",
+						"type": "UTF8"
+					},
+					{
+						"name": "load_timestamp",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_gold_currencyrates')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/gold/currency_rates",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ProductId",
+						"type": "INT32"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "DealerPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Markup",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Province",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_1",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_2",
+						"type": "UTF8"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Winery",
+						"type": "UTF8"
+					},
+					{
+						"name": "Year",
+						"type": "INT_16"
+					},
+					{
+						"name": "Store",
+						"type": "UTF8"
+					},
+					{
+						"name": "load_timestamp",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_gold_dates')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/gold/dates",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ProductId",
+						"type": "INT32"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "DealerPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Markup",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Province",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_1",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_2",
+						"type": "UTF8"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Winery",
+						"type": "UTF8"
+					},
+					{
+						"name": "Year",
+						"type": "INT_16"
+					},
+					{
+						"name": "Store",
+						"type": "UTF8"
+					},
+					{
+						"name": "load_timestamp",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_gold_product')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/gold/product",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "OnlineRetailer",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesMonth",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesCurrency",
+						"type": "UTF8"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Quantity",
+						"type": "INT64"
+					},
+					{
+						"name": "load_timestamp",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_gold_stores')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/gold/stores",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_product')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/bronze/product_parquet",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ProductId",
+						"type": "INT32"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "INT_16"
+					},
+					{
+						"name": "DealerPrice",
+						"type": "INT_16"
+					},
+					{
+						"name": "Markup",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Province",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_1",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region_2",
+						"type": "UTF8"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Winery",
+						"type": "UTF8"
+					},
+					{
+						"name": "Year",
+						"type": "INT_16"
+					},
+					{
+						"name": "website",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_productdata')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/bronze/product_parquet",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_sales')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_salesdata')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_silverArancione')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata/Arancione",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_silverCeleste')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata/Celeste",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_parquet_silverVerde')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/silver/salesdata/Verde",
+						"fileSystem": "wine-project"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "OnlineRetailer",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesMonth",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesCurrency",
+						"type": "UTF8"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "Vintage",
+						"type": "INT_16"
+					},
+					{
+						"name": "Variety",
+						"type": "UTF8"
+					},
+					{
+						"name": "Score",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ListPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Quantity",
+						"type": "INT64"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_unzip_sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "01_unzipandcopy"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "medallion/bronze",
+						"fileSystem": "wine-project"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_zip_Source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_linked_service",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "01_unzipandcopy"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "landing",
+						"fileSystem": "wine-project"
+					},
+					"compression": {
+						"type": "ZipDeflate"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLS_linked_service')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ADLS_linked_service_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ADLS_linked_service_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_AddColumnToProduct')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_csv_bronzeproduct",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvBronzeProduct"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "adls_parquet_productdata",
+								"type": "DatasetReference"
+							},
+							"name": "sinkParquetProduct",
+							"rejectedDataLinkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     df_filename as string",
+						"}",
+						"source(output(",
+						"          ProductId as integer,",
+						"          Country as string,",
+						"          Score as short,",
+						"          DealerPrice as short,",
+						"          Markup as double,",
+						"          ListPrice as double,",
+						"          Province as string,",
+						"          Region_1 as string,",
+						"          Region_2 as string,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Winery as string,",
+						"          Year as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     wildcardPaths:[(concat('medallion/bronze/ProductData/', $df_filename))]) ~> SourceCsvBronzeProduct",
+						"SourceCsvBronzeProduct derive(website = substring($df_filename, 1, length($df_filename)-13)) ~> derivedColumn1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkParquetProduct"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_bronzeproduct')]",
+				"[concat(variables('factoryId'), '/datasets/adls_parquet_productdata')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_CopyBronzeToGoldProduct')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_parquet_product",
+								"type": "DatasetReference"
+							},
+							"name": "CopyParquetProduct"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkParquetGoldProduct"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "SelectColumns"
+						},
+						{
+							"name": "CastColumnType"
+						},
+						{
+							"name": "filter1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ProductId as integer,",
+						"          Country as string,",
+						"          Score as short,",
+						"          DealerPrice as short,",
+						"          Markup as double,",
+						"          ListPrice as double,",
+						"          Province as string,",
+						"          Region_1 as string,",
+						"          Region_2 as string,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Winery as string,",
+						"          Year as short,",
+						"          website as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     purgeFiles: true,",
+						"     partitionRootPath: 'medallion/bronze/product_parquet',",
+						"     format: 'parquet') ~> CopyParquetProduct",
+						"CopyParquetProduct derive(load_timestamp = currentUTC()) ~> derivedColumn1",
+						"filter1 select(mapColumn(",
+						"          ProductId,",
+						"          Country,",
+						"          Score,",
+						"          DealerPrice,",
+						"          Markup,",
+						"          ListPrice,",
+						"          Province,",
+						"          Region_1,",
+						"          Region_2,",
+						"          Title,",
+						"          Vintage,",
+						"          Variety,",
+						"          Winery,",
+						"          Year,",
+						"          Store = website,",
+						"          load_timestamp",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+						"SelectColumns cast(output(",
+						"          ProductId as integer,",
+						"          Country as string,",
+						"          Score as short,",
+						"          DealerPrice as double,",
+						"          Markup as double,",
+						"          ListPrice as double,",
+						"          Province as string,",
+						"          Region_1 as string,",
+						"          Region_2 as string,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Winery as string,",
+						"          Year as short,",
+						"          Store as string,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     errors: true) ~> CastColumnType",
+						"derivedColumn1 filter(!isNull(ProductId)) ~> filter1",
+						"CastColumnType sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/product',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkParquetGoldProduct"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_parquet_product')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_CopyBronzeToSilverArancione')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_csv_silverArancione",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvArancione"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "adls_parquet_silverArancione",
+								"type": "DatasetReference"
+							},
+							"name": "sinkCsvForAarancione"
+						}
+					],
+					"transformations": [
+						{
+							"name": "cast1"
+						},
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          OnlineRetailer as string,",
+						"          SalesMonth as string,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as double,",
+						"          ListPrice as double,",
+						"          Quantity as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     purgeFiles: true,",
+						"     wildcardPaths:['medallion/silver/salesdata/Arancione*.csv']) ~> SourceCsvArancione",
+						"derivedColumn1 cast(output(",
+						"          OnlineRetailer as string,",
+						"          SalesMonth as date,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as double,",
+						"          ListPrice as double,",
+						"          Quantity as long",
+						"     ),",
+						"     errors: true) ~> cast1",
+						"SourceCsvArancione derive(SalesMonth = lastDayOfMonth(toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) ~> derivedColumn1",
+						"cast1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkCsvForAarancione"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_silverArancione')]",
+				"[concat(variables('factoryId'), '/datasets/adls_parquet_silverArancione')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_CopyBronzeToSilverForCeleste')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_csv_bronzeCeleste",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvCeleste"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "SourceDeltaCurrencyRate"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "adls_parquet_silverCeleste",
+								"type": "DatasetReference"
+							},
+							"name": "sinkCSVForCeleste"
+						},
+						{
+							"dataset": {
+								"referenceName": "ErrorRows",
+								"type": "DatasetReference"
+							},
+							"name": "sinkCSVForErrorCeleste"
+						}
+					],
+					"transformations": [
+						{
+							"name": "filterSummaryLine"
+						},
+						{
+							"name": "AggMonthlyQuantity"
+						},
+						{
+							"name": "RegionAssert"
+						},
+						{
+							"name": "errorRow"
+						},
+						{
+							"name": "NoErrorRows"
+						},
+						{
+							"name": "SelectColumns"
+						},
+						{
+							"name": "CastColumnType"
+						},
+						{
+							"name": "joinCurrencyRate"
+						},
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          TransactionId as string,",
+						"          TransactionDate as string,",
+						"          OnlineRetailer as string,",
+						"          SalesMonth as string,",
+						"          SalesRegion as string,",
+						"          SalesCurrency as string,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as double,",
+						"          ListPrice as double,",
+						"          Quantity as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionRootPath: 'medallion/bronze/Celeste') ~> SourceCsvCeleste",
+						"source(output(",
+						"          FromCurrency as string,",
+						"          ToCurrency as string,",
+						"          EffectiveDate as date,",
+						"          AverageRate as double,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/currency_rate') ~> SourceDeltaCurrencyRate",
+						"SourceCsvCeleste filter(left(TransactionDate, 21) != \"Total Sales Quantity:\") ~> filterSummaryLine",
+						"filterSummaryLine aggregate(groupBy(OnlineRetailer,",
+						"          SalesMonth,",
+						"          SalesRegion,",
+						"          SalesCurrency,",
+						"          Title,",
+						"          Vintage,",
+						"          Variety,",
+						"          Score,",
+						"          ListPrice),",
+						"     Quantity = sum(toInteger(Quantity))) ~> AggMonthlyQuantity",
+						"AggMonthlyQuantity assert(expectTrue(or(SalesCurrency==\"EUR\", SalesCurrency==\"GBP\"), false, 'AssertSalesCurrency')) ~> RegionAssert",
+						"RegionAssert derive(isErrorRow = isError()) ~> errorRow",
+						"errorRow split(isErrorRow == false(),",
+						"     disjoint: false) ~> NoErrorRows@(NoErrorRows, ErrorRows)",
+						"derivedColumn1 select(mapColumn(",
+						"          OnlineRetailer,",
+						"          SalesMonth,",
+						"          SalesRegion,",
+						"          Title,",
+						"          Vintage,",
+						"          Variety,",
+						"          Score,",
+						"          ListPrice,",
+						"          Quantity",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectColumns",
+						"SelectColumns cast(output(",
+						"          OnlineRetailer as string,",
+						"          SalesMonth as date,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as double,",
+						"          ListPrice as double,",
+						"          Quantity as long",
+						"     ),",
+						"     errors: true) ~> CastColumnType",
+						"NoErrorRows@NoErrorRows, SourceDeltaCurrencyRate join(lastDayOfMonth((toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) == EffectiveDate,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinCurrencyRate",
+						"joinCurrencyRate derive(ListPrice = iif(SalesCurrency == 'GBP', ListPrice * AverageRate, ListPrice),",
+						"          SalesMonth = lastDayOfMonth(toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) ~> derivedColumn1",
+						"CastColumnType sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkCSVForCeleste",
+						"NoErrorRows@ErrorRows sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkCSVForErrorCeleste"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_bronzeCeleste')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]",
+				"[concat(variables('factoryId'), '/datasets/adls_parquet_silverCeleste')]",
+				"[concat(variables('factoryId'), '/datasets/ErrorRows')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_CopyBronzeToSilverForVerde')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "02_bronzetosilver"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_csv_silverVerde",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvVerde"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "adls_parquet_SilverVerde_new",
+								"type": "DatasetReference"
+							},
+							"name": "sinkCsvForVerde"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "select1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          SalesMonth as string,",
+						"          OnlineRetailer as string,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as short,",
+						"          ListPrice as double,",
+						"          Quantity as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     purgeFiles: true,",
+						"     wildcardPaths:['medallion/silver/salesdata/Verde*.csv']) ~> SourceCsvVerde",
+						"SourceCsvVerde derive(SalesMonth = lastDayOfMonth(toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) ~> derivedColumn1",
+						"derivedColumn1 select(mapColumn(",
+						"          OnlineRetailer,",
+						"          SalesMonth,",
+						"          Title,",
+						"          Vintage,",
+						"          Variety,",
+						"          Score,",
+						"          ListPrice,",
+						"          Quantity",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          OnlineRetailer as string,",
+						"          SalesMonth as date,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as double,",
+						"          ListPrice as double,",
+						"          Quantity as long",
+						"     ),",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkCsvForVerde"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_silverVerde')]",
+				"[concat(variables('factoryId'), '/datasets/adls_parquet_SilverVerde_new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_CopyCsvMetadataToGold')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_csv_bronze_metadata",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvCurrency"
+						},
+						{
+							"dataset": {
+								"referenceName": "adls_csv_bronze_metadata",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvDates"
+						},
+						{
+							"dataset": {
+								"referenceName": "adls_csv_bronze_metadata",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvExchangeRates"
+						},
+						{
+							"dataset": {
+								"referenceName": "adls_csv_bronze_metadata",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvStore"
+						},
+						{
+							"dataset": {
+								"referenceName": "adls_csv_bronze_metadata",
+								"type": "DatasetReference"
+							},
+							"name": "SourceCsvTerritory"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkParquetCurrency"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkParquetDates"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkParquetExchangeRates"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkParquetStores"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkParquetTerritory"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "CastColumnType"
+						},
+						{
+							"name": "derivedColumn2"
+						},
+						{
+							"name": "CastColumnType2"
+						},
+						{
+							"name": "derivedColumn3"
+						},
+						{
+							"name": "CastColumnType3"
+						},
+						{
+							"name": "derivedColumn4"
+						},
+						{
+							"name": "CastColumnType4"
+						},
+						{
+							"name": "derivedColumn5"
+						},
+						{
+							"name": "CastColumnType5"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          CurrencyCode as string,",
+						"          CurrencyName as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: true,",
+						"     wildcardPaths:['medallion/bronze/MasterData/Currency.csv']) ~> SourceCsvCurrency",
+						"source(output(",
+						"          DateYear as short,",
+						"          DateMonth as short,",
+						"          YearMonth as string,",
+						"          LastDayOfMonth as string,",
+						"          Quarter as short,",
+						"          Season as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:['medallion/bronze/MasterData/Dates.csv']) ~> SourceCsvDates",
+						"source(output(",
+						"          FromCurrency as string,",
+						"          ToCurrency as string,",
+						"          EffectiveDate as string,",
+						"          AverageRate as double",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:['medallion/bronze/MasterData/ExchangeRates.csv']) ~> SourceCsvExchangeRates",
+						"source(output(",
+						"          StoreName as string,",
+						"          StoreType as string,",
+						"          Description as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:['medallion/bronze/MasterData/Store.csv']) ~> SourceCsvStore",
+						"source(output(",
+						"          TerritoryCode as string,",
+						"          TerritoryName as string,",
+						"          TradeRegion as string,",
+						"          Continent as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:['medallion/bronze/MasterData/Territory.csv']) ~> SourceCsvTerritory",
+						"SourceCsvCurrency derive(load_timestamp = currentUTC()) ~> derivedColumn1",
+						"derivedColumn1 cast(output(",
+						"          CurrencyCode as string,",
+						"          CurrencyName as string,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     errors: true) ~> CastColumnType",
+						"SourceCsvDates derive(LastDayOfMonth = toDate(LastDayOfMonth, 'M/d/yyyy'),",
+						"          load_timestamp = currentUTC()) ~> derivedColumn2",
+						"derivedColumn2 cast(output(",
+						"          DateYear as short,",
+						"          DateMonth as short,",
+						"          YearMonth as string,",
+						"          LastDayOfMonth as date,",
+						"          Quarter as short,",
+						"          Season as string,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     errors: true) ~> CastColumnType2",
+						"SourceCsvExchangeRates derive(load_timestamp = currentUTC()) ~> derivedColumn3",
+						"derivedColumn3 cast(output(",
+						"          FromCurrency as string,",
+						"          ToCurrency as string,",
+						"          EffectiveDate as date 'M/d/yyyy',",
+						"          AverageRate as double,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     errors: true) ~> CastColumnType3",
+						"SourceCsvStore derive(load_timestamp = currentUTC()) ~> derivedColumn4",
+						"derivedColumn4 cast(output(",
+						"          StoreName as string,",
+						"          StoreType as string,",
+						"          Description as string,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     errors: true) ~> CastColumnType4",
+						"SourceCsvTerritory derive(load_timestamp = currentUTC()) ~> derivedColumn5",
+						"derivedColumn5 cast(output(",
+						"          TerritoryCode as string,",
+						"          TerritoryName as string,",
+						"          TradeRegion as string,",
+						"          Continent as string,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     errors: true) ~> CastColumnType5",
+						"CastColumnType sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/currency',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkParquetCurrency",
+						"CastColumnType2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/dates',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     mapColumn(",
+						"          DateYear,",
+						"          DateMonth,",
+						"          YearMonth,",
+						"          LastDayOfMonth,",
+						"          Quarter,",
+						"          Season,",
+						"          load_timestamp",
+						"     )) ~> sinkParquetDates",
+						"CastColumnType3 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/currency_rate',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkParquetExchangeRates",
+						"CastColumnType4 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/stores',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkParquetStores",
+						"CastColumnType5 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/territory',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkParquetTerritory"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_bronze_metadata')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_CopySilverToGoldSalesData')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "03_silvertogold"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "adls_parquet_salesdata",
+								"type": "DatasetReference"
+							},
+							"name": "ParquetSilverSalesData"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkParquetForSalesData"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          OnlineRetailer as string,",
+						"          SalesMonth as date,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as double,",
+						"          ListPrice as double,",
+						"          Quantity as long,",
+						"          SalesRegion as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet',",
+						"     wildcardPaths:['medallion/silver/salesdata/**/*.parquet']) ~> ParquetSilverSalesData",
+						"ParquetSilverSalesData derive(load_timestamp = currentUTC()) ~> derivedColumn1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/sales',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     mapColumn(",
+						"          OnlineRetailer,",
+						"          SalesMonth,",
+						"          Title,",
+						"          Vintage,",
+						"          Variety,",
+						"          Score,",
+						"          ListPrice,",
+						"          Quantity,",
+						"          load_timestamp",
+						"     )) ~> sinkParquetForSalesData"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_parquet_salesdata')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_gold_agg_sales')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "SourceDeltaSales"
+						},
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "SourceDeltaProduct"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "ADLS_linked_service",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkFilteredSales"
+						}
+					],
+					"transformations": [
+						{
+							"name": "SalesJoinProduct"
+						},
+						{
+							"name": "filternullProductid"
+						},
+						{
+							"name": "selectColumns"
+						},
+						{
+							"name": "aggregateVarietyTitleVintage"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          OnlineRetailer as string,",
+						"          SalesMonth as date,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Score as double,",
+						"          ListPrice as double,",
+						"          Quantity as long,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/sales') ~> SourceDeltaSales",
+						"source(output(",
+						"          ProductId as integer,",
+						"          Country as string,",
+						"          Score as short,",
+						"          DealerPrice as double,",
+						"          Markup as double,",
+						"          ListPrice as double,",
+						"          Province as string,",
+						"          Region_1 as string,",
+						"          Region_2 as string,",
+						"          Title as string,",
+						"          Vintage as short,",
+						"          Variety as string,",
+						"          Winery as string,",
+						"          Year as short,",
+						"          Store as string,",
+						"          load_timestamp as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/product') ~> SourceDeltaProduct",
+						"SourceDeltaSales, aggregateVarietyTitleVintage join(SourceDeltaSales@Variety == aggregateVarietyTitleVintage@Variety",
+						"     && SourceDeltaSales@Title == aggregateVarietyTitleVintage@Title",
+						"     && SourceDeltaSales@Vintage == aggregateVarietyTitleVintage@Vintage,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> SalesJoinProduct",
+						"SalesJoinProduct filter(!isNull(ProductId)) ~> filternullProductid",
+						"filternullProductid select(mapColumn(",
+						"          OnlineRetailer,",
+						"          SalesMonth,",
+						"          ProductId,",
+						"          Title = SourceDeltaSales@Title,",
+						"          Vintage = SourceDeltaSales@Vintage,",
+						"          Variety = SourceDeltaSales@Variety,",
+						"          Score,",
+						"          ListPrice,",
+						"          Quantity,",
+						"          Load_timestamp = load_timestamp",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectColumns",
+						"SourceDeltaProduct aggregate(groupBy(Title,",
+						"          Vintage,",
+						"          Variety),",
+						"     ProductId = min(ProductId)) ~> aggregateVarietyTitleVintage",
+						"selectColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'wine-project',",
+						"     folderPath: 'medallion/gold/processed_sales',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkFilteredSales"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_linked_service')]"
+			]
+		}
+	]
+}

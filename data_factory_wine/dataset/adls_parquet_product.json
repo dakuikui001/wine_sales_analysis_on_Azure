@@ -1,0 +1,85 @@
+{
+	"name": "adls_parquet_product",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_linked_service",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "03_silvertogold"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "medallion/bronze/product_parquet",
+				"fileSystem": "wine-project"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "ProductId",
+				"type": "INT32"
+			},
+			{
+				"name": "Country",
+				"type": "UTF8"
+			},
+			{
+				"name": "Score",
+				"type": "INT_16"
+			},
+			{
+				"name": "DealerPrice",
+				"type": "INT_16"
+			},
+			{
+				"name": "Markup",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "ListPrice",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "Province",
+				"type": "UTF8"
+			},
+			{
+				"name": "Region_1",
+				"type": "UTF8"
+			},
+			{
+				"name": "Region_2",
+				"type": "UTF8"
+			},
+			{
+				"name": "Title",
+				"type": "UTF8"
+			},
+			{
+				"name": "Vintage",
+				"type": "INT_16"
+			},
+			{
+				"name": "Variety",
+				"type": "UTF8"
+			},
+			{
+				"name": "Winery",
+				"type": "UTF8"
+			},
+			{
+				"name": "Year",
+				"type": "INT_16"
+			},
+			{
+				"name": "website",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

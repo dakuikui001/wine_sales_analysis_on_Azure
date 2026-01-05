@@ -1,0 +1,9 @@
+{
+	"name": "wineDataFactiry",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c420bc16-1ed2-4a24-802c-816ff959fc40",
+		"tenantId": "a6dcd622-7624-4c7b-94ab-a8e9c9ee7d5e"
+	}
+}

@@ -1,0 +1,85 @@
+{
+	"name": "df_CopyBronzeToSilverForVerde",
+	"properties": {
+		"folder": {
+			"name": "02_bronzetosilver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "adls_csv_silverVerde",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvVerde"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "adls_parquet_SilverVerde_new",
+						"type": "DatasetReference"
+					},
+					"name": "sinkCsvForVerde"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          SalesMonth as string,",
+				"          OnlineRetailer as string,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as short,",
+				"          ListPrice as double,",
+				"          Quantity as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     purgeFiles: true,",
+				"     wildcardPaths:['medallion/silver/salesdata/Verde*.csv']) ~> SourceCsvVerde",
+				"SourceCsvVerde derive(SalesMonth = lastDayOfMonth(toDate(concat(SalesMonth, '-01'), 'yyyy-MM-dd'))) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          OnlineRetailer,",
+				"          SalesMonth,",
+				"          Title,",
+				"          Vintage,",
+				"          Variety,",
+				"          Score,",
+				"          ListPrice,",
+				"          Quantity",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          OnlineRetailer as string,",
+				"          SalesMonth as date,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as double,",
+				"          ListPrice as double,",
+				"          Quantity as long",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkCsvForVerde"
+			]
+		}
+	}
+}

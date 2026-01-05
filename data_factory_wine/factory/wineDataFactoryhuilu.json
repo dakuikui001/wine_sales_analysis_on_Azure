@@ -1,0 +1,9 @@
+{
+	"name": "wineDataFactoryhuilu",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "e8bee364-815f-45c0-beb6-c8430f434ee8",
+		"tenantId": "7272853f-c9c2-4df7-aeb6-4147476aa3a4"
+	}
+}

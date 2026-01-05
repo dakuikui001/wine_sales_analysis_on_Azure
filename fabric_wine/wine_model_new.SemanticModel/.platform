@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "wine_model_new"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "a5ffe4cb-0ace-9ac4-41c2-85b2860c438f"
+  }
+}

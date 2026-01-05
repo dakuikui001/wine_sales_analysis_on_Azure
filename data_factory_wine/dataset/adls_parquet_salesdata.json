@@ -1,0 +1,24 @@
+{
+	"name": "adls_parquet_salesdata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_linked_service",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "03_silvertogold"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "medallion/silver/salesdata",
+				"fileSystem": "wine-project"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

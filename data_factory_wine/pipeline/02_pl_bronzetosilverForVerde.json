@@ -1,0 +1,233 @@
+{
+	"name": "02_pl_bronzetosilverForVerde",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetFileList",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "adls_json_bronzeVerde",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ProcessForEachFile",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetFileList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetFileList').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "CopyJsonToCsv",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "FlattenHierarchy"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"path": "$['YearMonth']"
+											},
+											"sink": {
+												"name": "SalesMonth",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['StoreName']"
+											},
+											"sink": {
+												"name": "OnlineRetailer",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['Sales']['Product']"
+											},
+											"sink": {
+												"name": "Title",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['Sales']['Vintage']"
+											},
+											"sink": {
+												"name": "Vintage"
+											}
+										},
+										{
+											"source": {
+												"path": "$['Sales']['Variety']"
+											},
+											"sink": {
+												"name": "Variety"
+											}
+										},
+										{
+											"source": {
+												"path": "$['Sales']['Score']"
+											},
+											"sink": {
+												"name": "Score"
+											}
+										},
+										{
+											"source": {
+												"path": "$['Sales']['SalesPrice']"
+											},
+											"sink": {
+												"name": "ListPrice",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['Sales']['SalesQty']"
+											},
+											"sink": {
+												"name": "Quantity",
+												"type": "String"
+											}
+										}
+									],
+									"collectionReference": ""
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "adls_json_bronzeVerde_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "adls_csv_silverVerde_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"sinkfilename": {
+											"value": "@replace(item().name, '.json', '.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "df_CopyBronzeToSilverForVerde",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "ProcessForEachFile",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_CopyBronzeToSilverForVerde",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "02_bronzetosilver"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-12-27T14:45:23Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

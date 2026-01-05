@@ -1,0 +1,50 @@
+table 'Orders Distribution Metrics Selection'
+	lineageTag: 9b0cf43a-e710-4cfb-8322-fbfc0798b0ee
+
+	column 'Orders Distribution Metrics Selection'
+		lineageTag: 46c0da00-b9d2-4b76-b2f3-034932afbb30
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Orders Distribution Metrics Selection Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Orders Distribution Metrics Selection Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Orders Distribution Metrics Selection Fields'
+		isHidden
+		lineageTag: eb93a079-5217-4487-bf23-2369f4b8d6d5
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Orders Distribution Metrics Selection Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Orders Distribution Metrics Selection Order'
+		isHidden
+		formatString: 0
+		lineageTag: c71253fa-c5d0-4a8c-81be-5b56956a8ebf
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Orders Distribution Metrics Selection' = calculated
+		mode: import
+		source =
+				{
+				    ("Score", NAMEOF('product'[Score]), 0),
+				    ("Store", NAMEOF('product'[Store]), 1),
+				    ("Variety", NAMEOF('product'[Variety]), 2),
+				    ("Vintage", NAMEOF('product'[Vintage]), 3)
+				}
+
+	annotation PBI_Id = a6c6cddd33bd49cd8234b501281bae63
+

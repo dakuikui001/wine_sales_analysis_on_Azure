@@ -1,0 +1,98 @@
+[
+  {
+    "name": "territory",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/territory"
+      }
+    }
+  },
+  {
+    "name": "stores",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/stores"
+      }
+    }
+  },
+  {
+    "name": "sales",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/sales"
+      }
+    }
+  },
+  {
+    "name": "product",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/product"
+      }
+    }
+  },
+  {
+    "name": "processed_sales",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/processed_sales"
+      }
+    }
+  },
+  {
+    "name": "dates",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/dates"
+      }
+    }
+  },
+  {
+    "name": "currency_rate",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/currency_rate"
+      }
+    }
+  },
+  {
+    "name": "currency",
+    "path": "/Tables/dbo",
+    "target": {
+      "type": "AdlsGen2",
+      "adlsGen2": {
+        "connectionId": "9da13c53-0827-4eff-b6aa-14c7543170da",
+        "location": "https://dataprojectsforhuilu.dfs.core.windows.net",
+        "subpath": "/wine-project/medallion/gold/currency"
+      }
+    }
+  }
+]

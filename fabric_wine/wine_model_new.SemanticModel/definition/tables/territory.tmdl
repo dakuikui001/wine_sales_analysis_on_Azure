@@ -1,0 +1,57 @@
+table territory
+	lineageTag: fc840436-6dcf-4a72-bcfe-631f8efa317c
+	sourceLineageTag: [dbo].[territory]
+
+	column TerritoryCode
+		dataType: string
+		lineageTag: d061768f-7f25-40a0-bf78-76e3c18e50cb
+		sourceLineageTag: TerritoryCode
+		summarizeBy: none
+		sourceColumn: TerritoryCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column TerritoryName
+		dataType: string
+		lineageTag: 247bc7d9-9c1c-4796-9575-35ab36a1c0b8
+		sourceLineageTag: TerritoryName
+		summarizeBy: none
+		sourceColumn: TerritoryName
+
+		annotation SummarizationSetBy = Automatic
+
+	column TradeRegion
+		dataType: string
+		lineageTag: dd7d8454-da94-4887-bd0b-8ef28ca7bc39
+		sourceLineageTag: TradeRegion
+		summarizeBy: none
+		sourceColumn: TradeRegion
+
+		annotation SummarizationSetBy = Automatic
+
+	column Continent
+		dataType: string
+		lineageTag: 49a8b7e0-b9b4-44f2-a8e0-b5dc95d963d6
+		sourceLineageTag: Continent
+		summarizeBy: none
+		sourceColumn: Continent
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 557c6784-262a-48f6-8169-484a7c734419
+		sourceLineageTag: load_timestamp
+		summarizeBy: none
+		sourceColumn: load_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	partition territory = entity
+		mode: directLake
+		source
+			entityName: territory
+			schemaName: dbo
+			expressionSource: 'DirectLake - wine_LH'
+

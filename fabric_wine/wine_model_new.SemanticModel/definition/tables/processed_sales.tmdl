@@ -1,0 +1,110 @@
+table processed_sales
+	lineageTag: 978e01b7-cfab-4a1e-8c3d-01e90c6d9e80
+	sourceLineageTag: [dbo].[processed_sales]
+
+	column OnlineRetailer
+		dataType: string
+		lineageTag: b8001507-f550-4b85-99cf-cbc12ceaeb6c
+		sourceLineageTag: OnlineRetailer
+		summarizeBy: none
+		sourceColumn: OnlineRetailer
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesMonth
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 66fa61ee-f1e9-49d1-adc7-aef8bb83f6f8
+		sourceLineageTag: SalesMonth
+		summarizeBy: none
+		sourceColumn: SalesMonth
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductId
+		dataType: int64
+		formatString: 0
+		lineageTag: bb7402a4-fbc1-4024-b49e-4bc88a9d3f5c
+		sourceLineageTag: ProductId
+		summarizeBy: none
+		sourceColumn: ProductId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Title
+		dataType: string
+		lineageTag: 09ce071e-1f6d-4520-931c-a862d8be986f
+		sourceLineageTag: Title
+		summarizeBy: none
+		sourceColumn: Title
+
+		annotation SummarizationSetBy = Automatic
+
+	column Vintage
+		dataType: int64
+		formatString: 0
+		lineageTag: 3b4b72dd-f065-4e63-856b-98e95b809fb3
+		sourceLineageTag: Vintage
+		summarizeBy: sum
+		sourceColumn: Vintage
+
+		annotation SummarizationSetBy = Automatic
+
+	column Variety
+		dataType: string
+		lineageTag: c0434b28-2ae3-4303-a2b6-10a7650e08d2
+		sourceLineageTag: Variety
+		summarizeBy: none
+		sourceColumn: Variety
+
+		annotation SummarizationSetBy = Automatic
+
+	column Score
+		dataType: double
+		lineageTag: 8aaf9af7-f7d5-40ba-bda9-19277611b572
+		sourceLineageTag: Score
+		summarizeBy: sum
+		sourceColumn: Score
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ListPrice
+		dataType: double
+		lineageTag: f166b69f-5eef-4f70-813c-803cdd76545c
+		sourceLineageTag: ListPrice
+		summarizeBy: sum
+		sourceColumn: ListPrice
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: a9366828-adcd-460e-b009-5cabaf6f64ba
+		sourceLineageTag: Quantity
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Load_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: d76be680-66ee-487e-81bd-00bb9799c9f4
+		sourceLineageTag: Load_timestamp
+		summarizeBy: none
+		sourceColumn: Load_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	partition processed_sales = entity
+		mode: directLake
+		source
+			entityName: processed_sales
+			schemaName: dbo
+			expressionSource: 'DirectLake - wine_LH'
+

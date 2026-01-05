@@ -1,0 +1,187 @@
+{
+	"name": "00_main",
+	"properties": {
+		"activities": [
+			{
+				"name": "01_pl_unzipandcopy",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "01_pl_unzipandcopy",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "03_pl_silvertogold_metadata",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "01_pl_unzipandcopy",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "03_pl_silvertogold_metadata",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "03_pl_silvertogold_productdata",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "03_pl_silvertogold_metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "03_pl_silvertogold_productdata",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "02_pl_bronzetosilverForCeleste",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "03_pl_silvertogold_productdata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "02_pl_bronzetosilverForCeleste",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "02_pl_bronzetosilverForArancione",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "02_pl_bronzetosilverForCeleste",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "02_pl_bronzetosilverForArancione",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "02_pl_bronzetosilverForVerde",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "02_pl_bronzetosilverForArancione",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "02_pl_bronzetosilverForVerde",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "03_pl_silvertogold_saledata",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "02_pl_bronzetosilverForVerde",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "03_pl_silvertogold_saledata",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "04_gold_agg",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "03_pl_silvertogold_saledata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "04_gold_agg",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-12-27T14:45:23Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

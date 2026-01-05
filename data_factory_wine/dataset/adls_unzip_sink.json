@@ -1,0 +1,22 @@
+{
+	"name": "adls_unzip_sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_linked_service",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "01_unzipandcopy"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "medallion/bronze",
+				"fileSystem": "wine-project"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

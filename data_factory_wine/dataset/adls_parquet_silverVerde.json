@@ -1,0 +1,61 @@
+{
+	"name": "adls_parquet_silverVerde",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_linked_service",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "02_bronzetosilver"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "medallion/silver/salesdata/Verde",
+				"fileSystem": "wine-project"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "OnlineRetailer",
+				"type": "UTF8"
+			},
+			{
+				"name": "SalesMonth",
+				"type": "UTF8"
+			},
+			{
+				"name": "SalesCurrency",
+				"type": "UTF8"
+			},
+			{
+				"name": "Title",
+				"type": "UTF8"
+			},
+			{
+				"name": "Vintage",
+				"type": "INT_16"
+			},
+			{
+				"name": "Variety",
+				"type": "UTF8"
+			},
+			{
+				"name": "Score",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "ListPrice",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "Quantity",
+				"type": "INT64"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

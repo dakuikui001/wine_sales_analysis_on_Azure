@@ -1,0 +1,134 @@
+{
+	"name": "df_gold_agg_sales",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "SourceDeltaSales"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "SourceDeltaProduct"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkFilteredSales"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SalesJoinProduct"
+				},
+				{
+					"name": "filternullProductid"
+				},
+				{
+					"name": "selectColumns"
+				},
+				{
+					"name": "aggregateVarietyTitleVintage"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          OnlineRetailer as string,",
+				"          SalesMonth as date,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Score as double,",
+				"          ListPrice as double,",
+				"          Quantity as long,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/sales') ~> SourceDeltaSales",
+				"source(output(",
+				"          ProductId as integer,",
+				"          Country as string,",
+				"          Score as short,",
+				"          DealerPrice as double,",
+				"          Markup as double,",
+				"          ListPrice as double,",
+				"          Province as string,",
+				"          Region_1 as string,",
+				"          Region_2 as string,",
+				"          Title as string,",
+				"          Vintage as short,",
+				"          Variety as string,",
+				"          Winery as string,",
+				"          Year as short,",
+				"          Store as string,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/product') ~> SourceDeltaProduct",
+				"SourceDeltaSales, aggregateVarietyTitleVintage join(SourceDeltaSales@Variety == aggregateVarietyTitleVintage@Variety",
+				"     && SourceDeltaSales@Title == aggregateVarietyTitleVintage@Title",
+				"     && SourceDeltaSales@Vintage == aggregateVarietyTitleVintage@Vintage,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> SalesJoinProduct",
+				"SalesJoinProduct filter(!isNull(ProductId)) ~> filternullProductid",
+				"filternullProductid select(mapColumn(",
+				"          OnlineRetailer,",
+				"          SalesMonth,",
+				"          ProductId,",
+				"          Title = SourceDeltaSales@Title,",
+				"          Vintage = SourceDeltaSales@Vintage,",
+				"          Variety = SourceDeltaSales@Variety,",
+				"          Score,",
+				"          ListPrice,",
+				"          Quantity,",
+				"          Load_timestamp = load_timestamp",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectColumns",
+				"SourceDeltaProduct aggregate(groupBy(Title,",
+				"          Vintage,",
+				"          Variety),",
+				"     ProductId = min(ProductId)) ~> aggregateVarietyTitleVintage",
+				"selectColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/processed_sales',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkFilteredSales"
+			]
+		}
+	}
+}

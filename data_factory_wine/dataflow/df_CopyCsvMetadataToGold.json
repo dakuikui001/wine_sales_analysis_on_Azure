@@ -1,0 +1,312 @@
+{
+	"name": "df_CopyCsvMetadataToGold",
+	"properties": {
+		"folder": {
+			"name": "03_silvertogold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "adls_csv_bronze_metadata",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvCurrency"
+				},
+				{
+					"dataset": {
+						"referenceName": "adls_csv_bronze_metadata",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvDates"
+				},
+				{
+					"dataset": {
+						"referenceName": "adls_csv_bronze_metadata",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvExchangeRates"
+				},
+				{
+					"dataset": {
+						"referenceName": "adls_csv_bronze_metadata",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvStore"
+				},
+				{
+					"dataset": {
+						"referenceName": "adls_csv_bronze_metadata",
+						"type": "DatasetReference"
+					},
+					"name": "SourceCsvTerritory"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkParquetCurrency"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkParquetDates"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkParquetExchangeRates"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkParquetStores"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ADLS_linked_service",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkParquetTerritory"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "CastColumnType"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "CastColumnType2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "CastColumnType3"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "CastColumnType4"
+				},
+				{
+					"name": "derivedColumn5"
+				},
+				{
+					"name": "CastColumnType5"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CurrencyCode as string,",
+				"          CurrencyName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: true,",
+				"     wildcardPaths:['medallion/bronze/MasterData/Currency.csv']) ~> SourceCsvCurrency",
+				"source(output(",
+				"          DateYear as short,",
+				"          DateMonth as short,",
+				"          YearMonth as string,",
+				"          LastDayOfMonth as string,",
+				"          Quarter as short,",
+				"          Season as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['medallion/bronze/MasterData/Dates.csv']) ~> SourceCsvDates",
+				"source(output(",
+				"          FromCurrency as string,",
+				"          ToCurrency as string,",
+				"          EffectiveDate as string,",
+				"          AverageRate as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['medallion/bronze/MasterData/ExchangeRates.csv']) ~> SourceCsvExchangeRates",
+				"source(output(",
+				"          StoreName as string,",
+				"          StoreType as string,",
+				"          Description as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['medallion/bronze/MasterData/Store.csv']) ~> SourceCsvStore",
+				"source(output(",
+				"          TerritoryCode as string,",
+				"          TerritoryName as string,",
+				"          TradeRegion as string,",
+				"          Continent as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['medallion/bronze/MasterData/Territory.csv']) ~> SourceCsvTerritory",
+				"SourceCsvCurrency derive(load_timestamp = currentUTC()) ~> derivedColumn1",
+				"derivedColumn1 cast(output(",
+				"          CurrencyCode as string,",
+				"          CurrencyName as string,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     errors: true) ~> CastColumnType",
+				"SourceCsvDates derive(LastDayOfMonth = toDate(LastDayOfMonth, 'M/d/yyyy'),",
+				"          load_timestamp = currentUTC()) ~> derivedColumn2",
+				"derivedColumn2 cast(output(",
+				"          DateYear as short,",
+				"          DateMonth as short,",
+				"          YearMonth as string,",
+				"          LastDayOfMonth as date,",
+				"          Quarter as short,",
+				"          Season as string,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     errors: true) ~> CastColumnType2",
+				"SourceCsvExchangeRates derive(load_timestamp = currentUTC()) ~> derivedColumn3",
+				"derivedColumn3 cast(output(",
+				"          FromCurrency as string,",
+				"          ToCurrency as string,",
+				"          EffectiveDate as date 'M/d/yyyy',",
+				"          AverageRate as double,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     errors: true) ~> CastColumnType3",
+				"SourceCsvStore derive(load_timestamp = currentUTC()) ~> derivedColumn4",
+				"derivedColumn4 cast(output(",
+				"          StoreName as string,",
+				"          StoreType as string,",
+				"          Description as string,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     errors: true) ~> CastColumnType4",
+				"SourceCsvTerritory derive(load_timestamp = currentUTC()) ~> derivedColumn5",
+				"derivedColumn5 cast(output(",
+				"          TerritoryCode as string,",
+				"          TerritoryName as string,",
+				"          TradeRegion as string,",
+				"          Continent as string,",
+				"          load_timestamp as timestamp",
+				"     ),",
+				"     errors: true) ~> CastColumnType5",
+				"CastColumnType sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/currency',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkParquetCurrency",
+				"CastColumnType2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/dates',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          DateYear,",
+				"          DateMonth,",
+				"          YearMonth,",
+				"          LastDayOfMonth,",
+				"          Quarter,",
+				"          Season,",
+				"          load_timestamp",
+				"     )) ~> sinkParquetDates",
+				"CastColumnType3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/currency_rate',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkParquetExchangeRates",
+				"CastColumnType4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/stores',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkParquetStores",
+				"CastColumnType5 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'wine-project',",
+				"     folderPath: 'medallion/gold/territory',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkParquetTerritory"
+			]
+		}
+	}
+}

@@ -1,0 +1,96 @@
+table dates
+	lineageTag: 08a0c839-4c58-4ba8-bcb7-8967b7fb76c9
+	sourceLineageTag: [dbo].[dates]
+
+	column DateYear
+		dataType: int64
+		formatString: 0
+		lineageTag: 34e3013a-1bce-4cf8-9463-254a318ec319
+		sourceLineageTag: DateYear
+		summarizeBy: none
+		sourceColumn: DateYear
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: b53eb5c0-5739-4c9c-a679-02ce140de37f
+		sourceLineageTag: DateMonth
+		summarizeBy: none
+		sourceColumn: DateMonth
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearMonth
+		dataType: string
+		lineageTag: 255395cf-0b50-4055-9240-bf2060390f7d
+		sourceLineageTag: YearMonth
+		summarizeBy: none
+		sourceColumn: YearMonth
+
+		annotation SummarizationSetBy = Automatic
+
+	column LastDayOfMonth
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: a3e9416b-6cdc-4a44-ae6b-876c42d45dbc
+		sourceLineageTag: LastDayOfMonth
+		summarizeBy: none
+		sourceColumn: LastDayOfMonth
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 814c2efa-8d39-4ee1-93d5-425b0675103f
+		sourceLineageTag: Quarter
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column Season
+		dataType: string
+		lineageTag: e4fc48f7-2488-4196-ab04-36e82ee6865e
+		sourceLineageTag: Season
+		summarizeBy: none
+		sourceColumn: Season
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 6073a4e1-68da-4abd-a28c-38a353e5f9af
+		sourceLineageTag: load_timestamp
+		summarizeBy: none
+		sourceColumn: load_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Date Hierarchy'
+		lineageTag: 4f816c06-3ddf-4a1c-90fc-eb33c7d6c0da
+
+		level DateYear
+			lineageTag: bb81380d-4afa-49a3-9e13-8767d6e84df0
+			column: DateYear
+
+		level Quarter
+			lineageTag: 921cd313-64af-4dd9-9995-c988e1b51f96
+			column: Quarter
+
+		level YearMonth
+			lineageTag: 4dd020ee-da61-4901-a70b-1e3d7041409f
+			column: YearMonth
+
+		changedProperty = Name
+
+	partition dates = entity
+		mode: directLake
+		source
+			entityName: dates
+			schemaName: dbo
+			expressionSource: 'DirectLake - wine_LH'
+

@@ -1,0 +1,65 @@
+{
+	"name": "adls_json_bronzeVerde_param",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_linked_service",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filename": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "02_bronzetosilver"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				},
+				"folderPath": "medallion/bronze/Verde",
+				"fileSystem": "wine-project"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"YearMonth": {
+					"type": "string"
+				},
+				"StoreName": {
+					"type": "string"
+				},
+				"Sales": {
+					"type": "object",
+					"properties": {
+						"Product": {
+							"type": "string"
+						},
+						"Vintage": {
+							"type": "string"
+						},
+						"Variety": {
+							"type": "string"
+						},
+						"Score": {
+							"type": "string"
+						},
+						"SalesPrice": {
+							"type": "string"
+						},
+						"SalesQty": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,144 @@
+table 'Measure Table'
+	lineageTag: df319501-deff-4b48-916b-544f6c62d832
+
+	measure 'Total Sales' = SUMX(processed_sales, processed_sales[ListPrice] * processed_sales[Quantity])
+		lineageTag: 06253b26-a3a0-425f-954a-36d5484ebc66
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Orders' = SUM(processed_sales[Quantity])
+		formatString: 0
+		lineageTag: 0a756976-1d25-430c-bc47-7ab109022233
+
+	measure 'Total Cost' = SUMX(processed_sales, processed_sales[Quantity]*RELATED('product'[DealerPrice]))
+		lineageTag: 3d57bc8c-8f1e-4353-b88f-e5eeb9b866de
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Previous Month Orders' = ```
+			
+			VAR CurrentMonthDate = SELECTEDVALUE('dates'[LastDayOfMonth])
+			VAR PreviousMonthDate = 
+			    MAXX(
+			        FILTER(
+			            ALL('dates'[LastDayOfMonth]), 
+			            'dates'[LastDayOfMonth] < CurrentMonthDate
+			        ), 
+			        'dates'[LastDayOfMonth]
+			    )
+			RETURN
+			CALCULATE(
+			    [Total Orders],
+			    ALL('dates'),
+			    'dates'[LastDayOfMonth] = PreviousMonthDate
+			)
+			```
+		formatString: 0
+		lineageTag: 4ab9592b-91be-4db7-a785-5443e5acc1d1
+
+	measure 'Gross Profit' = [Total Sales] - [Total Cost]
+		lineageTag: a580cd43-5b6a-49b4-b65f-77e889a7b3d9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Gross Margin %' = DIVIDE([Gross Profit], [Total Sales], 0)
+		lineageTag: d3987493-19cd-41d2-b71c-039116f63052
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Previous Month Profit' = ```
+			
+			VAR CurrentMonthDate = SELECTEDVALUE('dates'[LastDayOfMonth])
+			VAR PreviousMonthDate = 
+			    MAXX(
+			        FILTER(
+			            ALL('dates'[LastDayOfMonth]), 
+			            'dates'[LastDayOfMonth] < CurrentMonthDate
+			        ), 
+			        'dates'[LastDayOfMonth]
+			    )
+			RETURN
+			CALCULATE(
+			    [Gross Profit],
+			    ALL('dates'),
+			    'dates'[LastDayOfMonth] = PreviousMonthDate
+			)
+			```
+		lineageTag: b6a197e7-cdfb-4ef5-a8ff-27b2957129c7
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Previous Month Sales' = ```
+			
+			VAR CurrentMonthDate = SELECTEDVALUE('dates'[LastDayOfMonth])
+			VAR PreviousMonthDate = 
+			    MAXX(
+			        FILTER(
+			            ALL('dates'[LastDayOfMonth]), 
+			            'dates'[LastDayOfMonth] < CurrentMonthDate
+			        ), 
+			        'dates'[LastDayOfMonth]
+			    )
+			RETURN
+			CALCULATE(
+			    [Total Sales],
+			    ALL('dates'),
+			    'dates'[LastDayOfMonth] = PreviousMonthDate
+			)
+			```
+		lineageTag: 6f23a783-4a7b-457e-a8fe-59ca79a71ebd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Target Gross Profit' = [Previous Month Profit] * 1.2
+		lineageTag: b7aa825d-e486-40da-806a-39e3bc568638
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Target Orders' = [Previous Month Orders] * 1.2
+		lineageTag: bdbb0852-1688-464f-b204-c4422672d388
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Target Sales' = [Previous Month Sales] * 1.2
+		lineageTag: 005c52b6-3c1f-41e4-b105-c905a58aebbb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure DateExists = IF(ISBLANK(COUNT(processed_sales[SalesMonth])), 0, 1)
+		formatString: 0
+		lineageTag: ea7ef1f0-acba-4ea6-ae11-63c9e5ed3102
+
+	measure 'Average Score' = AVERAGE('product'[Score])
+		lineageTag: c3b51192-5e2d-4a89-9e41-2fa5f80a3b04
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Adjusted Sales' = ```
+			
+			SUMX(
+			    processed_sales, 
+			    processed_sales[Quantity] * RELATED('product'[ListPrice]) * (1 + [price adjustment Value])
+			)
+			```
+		lineageTag: f08b15e6-b303-4630-96b5-c117e511f5bb
+
+	measure 'Adjusted Profit' = [Adjusted Sales] - [Total Cost]
+		lineageTag: 1936540e-d8c4-4381-aa7a-04e0318ab1f0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Value
+		lineageTag: 4419478f-82eb-429b-9f7c-80140b8ceec4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Measure Table' = calculated
+		mode: import
+		source = {""}
+
+	annotation PBI_Id = 7bcca508bb084a9c8d0e0ef9484b19d3
+
